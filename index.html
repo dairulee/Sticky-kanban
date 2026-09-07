@@ -25,6 +25,13 @@ body.today-focus .column:not([data-column="today"]):not([data-column="progress"]
 @media(max-width:900px){.board{grid-template-columns:repeat(5,80vw)}body.today-focus .board{grid-template-columns:repeat(3,80vw)}.topbar{align-items:flex-start}.brand p{max-width:55vw}.col-head{top:78px}.column{min-height:70vh}.boardbar{align-items:flex-start;flex-wrap:wrap}.seg{order:3}}
 @media(min-width:1000px) and (orientation:landscape){.board{grid-template-columns:repeat(5,minmax(190px,1fr));min-width:0}.board-wrap{overflow-x:visible}.column{min-height:79vh}body.today-focus .board{grid-template-columns:repeat(3,minmax(250px,1fr))}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+.v5chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.v5chip{font-size:11px;font-weight:800;background:rgba(255,255,255,.58);border:1px solid rgba(0,0,0,.08);padding:3px 6px;border-radius:999px}
+.focus-btn{border:0;background:rgba(255,255,255,.68);font-weight:900;border-radius:999px;padding:4px 7px;font-size:11px}
+#pomoPanel{position:fixed;right:18px;bottom:18px;z-index:9999;display:none;min-width:245px;padding:15px;border-radius:18px;background:#fffdf5;border:1px solid #ded4bd;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+#pomoPanel.on{display:block}#pomoTime{font-size:36px;font-weight:950;margin:4px 0 8px}#pomoTitle{font-weight:900;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pomoPanel .btnrow{display:flex;gap:7px}#pomoPanel button{border:0;border-radius:10px;padding:8px 10px;font-weight:850}
+
 </style>
 </head>
 <body>
@@ -41,6 +48,26 @@ body.today-focus .column:not([data-column="today"]):not([data-column="progress"]
 <div class="field"><label>Column</label><select id="noteColumn"></select></div>
 <div class="field"><label>Sticky color</label><input type="hidden" id="noteColor" value="yellow" /><div class="color-row" id="colorRow"></div></div>
 <div class="field"><label>Due date (optional)</label><input id="noteDue" type="date" /></div>
+<div class="field"><label>Due time (optional)</label><input id="noteTime" type="time" /></div>
+<div class="field"><label>Reminder</label><select id="noteReminder">
+<option value="none">None</option>
+<option value="at-time">At due time</option>
+<option value="10-min">10 min before</option>
+<option value="1-hour">1 hour before</option>
+<option value="1-day">1 day before</option>
+</select></div>
+<div class="field"><label>Repeat</label><select id="noteRepeat">
+<option value="none">None</option>
+<option value="daily">Daily</option>
+<option value="weekly">Weekly</option>
+<option value="monthly">Monthly</option>
+</select></div>
+<div class="field"><label>Pomodoro focus length</label><select id="noteFocus">
+<option value="25">25 minutes</option>
+<option value="30">30 minutes</option>
+<option value="45">45 minutes</option>
+<option value="50">50 minutes</option>
+</select></div>
 <div class="modal-actions"><button type="button" class="btn danger" id="deleteNoteBtn" hidden>Delete</button><button type="button" class="btn" id="cancelNoteBtn">Cancel</button><button class="btn primary">Save</button></div><div class="hint">Hold and drag a sticky to move it. Drop above or below another sticky to reorder it.</div></form></dialog>
 
 <dialog id="boardDialog"><form method="dialog" class="modal" id="boardForm"><h2>New Board</h2><div class="field"><label>Board name</label><input id="boardName" maxlength="40" required placeholder="e.g. School, Kids, Home" /></div><div class="modal-actions"><button type="button" class="btn" id="cancelBoardBtn">Cancel</button><button class="btn primary">Create</button></div></form></dialog>
@@ -56,7 +83,7 @@ const defaultState={activeBoard:'school',view:'all',boards:[{id:'school',name:'S
 {id:'n3',board:'school',column:'progress',title:'Wrong-answer review',body:'Redo missed questions before checking answers.',color:'blue',due:'',created:Date.now()-1000,order:3000,checks:[]}
 ]};
 function clone(v){return JSON.parse(JSON.stringify(v))} function uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-5)}
-function load(){try{let raw=localStorage.getItem(KEY);if(!raw)for(const k of LEGACY){raw=localStorage.getItem(k);if(raw)break}const s=raw?JSON.parse(raw):clone(defaultState);s.view=s.view||'all';s.notes=(s.notes||[]).map(n=>({...n,checks:Array.isArray(n.checks)?n.checks:[]}));return s}catch{return clone(defaultState)}}
+function load(){try{let raw=localStorage.getItem(KEY);if(!raw)for(const k of LEGACY){raw=localStorage.getItem(k);if(raw)break}const s=raw?JSON.parse(raw):clone(defaultState);s.view=s.view||'all';s.notes=(s.notes||[]).map(n=>({...n,checks:Array.isArray(n.checks)?n.checks:[],time:n.time||'',reminder:n.reminder||'none',repeat:n.repeat||'none',focus:Number(n.focus)||25,pomos:Number(n.pomos)||0}));return s}catch{return clone(defaultState)}}
 let state=load(); function save(){localStorage.setItem(KEY,JSON.stringify(state))} function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function toast(msg){const t=document.querySelector('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),1250)}
 function activeNotes(column){return state.notes.filter(n=>n.board===state.activeBoard&&n.column===column).sort((a,b)=>(a.order??a.created)-(b.order??b.created))}
@@ -65,8 +92,10 @@ function render(){document.body.classList.toggle('today-focus',state.view==='tod
 function renderTabs(){const el=document.querySelector('#boardTabs');el.innerHTML=state.boards.map(b=>`<button class="tab ${b.id===state.activeBoard?'active':''}" data-board="${b.id}">${esc(b.name)}</button>`).join('');el.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{state.activeBoard=t.dataset.board;render()})}
 function renderColumns(){const root=document.querySelector('#columns');root.innerHTML='';COLS.forEach(([id,label])=>{const notes=activeNotes(id);const col=document.createElement('section');col.className='column';col.dataset.column=id;col.innerHTML=`<div class="col-head"><div class="col-title">${label} ${id==='today'?'<span class="today-badge">FOCUS</span>':''}</div><div class="col-tools"><span class="count">${notes.length}</span><button class="mini" data-add="${id}" aria-label="Add">+</button></div></div><div class="notes"></div>`;const list=col.querySelector('.notes');if(!notes.length)list.innerHTML='<div class="empty">Drop sticky notes here</div>';notes.forEach((n,i)=>list.appendChild(noteEl(n,i)));col.querySelector('.mini').onclick=()=>openNew(id);root.appendChild(col)})}
 function isOverdue(n){if(!n.due||n.column==='completed')return false;const today=new Date();today.setHours(0,0,0,0);return new Date(n.due+'T00:00:00')<today}
-function prettyDue(d){if(!d)return'No due date';const dt=new Date(d+'T00:00:00');return 'Due '+dt.toLocaleDateString(undefined,{month:'short',day:'numeric'})}
-function noteEl(n,i){const el=document.createElement('article');el.className=`note ${n.color||'yellow'} ${n.column==='completed'?'done':''}`;el.dataset.id=n.id;el.style.setProperty('--rot',`${((n.id.charCodeAt(0)+i)%5-2)*0.32}deg`);const checks=(n.checks||[]).map(c=>`<label class="check"><input type="checkbox" data-check="${c.id}" ${c.done?'checked':''}><span class="${c.done?'checked':''}">${esc(c.text)}</span></label>`).join('');el.innerHTML=`<button class="note-menu" aria-label="Edit">•••</button><h3>${esc(n.title)}</h3>${n.body?`<div class="body">${esc(n.body)}</div>`:''}${checks?`<div class="checks">${checks}</div>`:''}<div class="meta"><span class="due ${isOverdue(n)?'overdue':''}">${prettyDue(n.due)}</span><span>☰ drag</span></div>`;el.querySelector('.note-menu').onclick=e=>{e.stopPropagation();openEdit(n.id)};el.querySelectorAll('[data-check]').forEach(cb=>cb.addEventListener('change',e=>{e.stopPropagation();const c=n.checks.find(x=>x.id===cb.dataset.check);if(c){c.done=cb.checked;save();renderColumns()}}));attachPointerDrag(el,n.id);return el}
+function prettyDue(d,t=''){if(!d&&!t)return'No due date';let s=d?('Due '+new Date(d+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'})):'Due';if(t){const [h,m]=t.split(':').map(Number);const dt=new Date();dt.setHours(h,m,0,0);s+=' · '+dt.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}return s}
+function reminderLabel(v){return ({'at-time':'At time','10-min':'10m before','1-hour':'1h before','1-day':'1d before'})[v]||''}
+function repeatLabel(v){return ({daily:'Daily',weekly:'Weekly',monthly:'Monthly'})[v]||''}
+function noteEl(n,i){const el=document.createElement('article');el.className=`note ${n.color||'yellow'} ${n.column==='completed'?'done':''}`;el.dataset.id=n.id;el.style.setProperty('--rot',`${((n.id.charCodeAt(0)+i)%5-2)*0.32}deg`);const checks=(n.checks||[]).map(c=>`<label class="check"><input type="checkbox" data-check="${c.id}" ${c.done?'checked':''}><span class="${c.done?'checked':''}">${esc(c.text)}</span></label>`).join('');const chips=[];if(n.reminder&&n.reminder!=='none')chips.push(`<span class="v5chip">🔔 ${reminderLabel(n.reminder)}</span>`);if(n.repeat&&n.repeat!=='none')chips.push(`<span class="v5chip">🔁 ${repeatLabel(n.repeat)}</span>`);if(n.pomos)chips.push(`<span class="v5chip">🍅 ${n.pomos}</span>`);el.innerHTML=`<button class="note-menu" aria-label="Edit">•••</button><h3>${esc(n.title)}</h3>${n.body?`<div class="body">${esc(n.body)}</div>`:''}${checks?`<div class="checks">${checks}</div>`:''}<div class="meta"><span class="due ${isOverdue(n)?'overdue':''}">${prettyDue(n.due,n.time)}</span><span>☰ drag</span></div><div class="v5chips">${chips.join('')}<button type="button" class="focus-btn">🍅 Focus</button></div>`;el.querySelector('.note-menu').onclick=e=>{e.stopPropagation();openEdit(n.id)};el.querySelector('.focus-btn').onclick=e=>{e.stopPropagation();startPomodoro(n.id)};el.querySelectorAll('[data-check]').forEach(cb=>cb.addEventListener('change',e=>{e.stopPropagation();const c=n.checks.find(x=>x.id===cb.dataset.check);if(c){c.done=cb.checked;save();renderColumns()}}));attachPointerDrag(el,n.id);return el}
 let drag=null;
 function attachPointerDrag(el,id){el.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;if(e.target.closest('button,input,label'))return;const sx=e.clientX,sy=e.clientY,pid=e.pointerId;let started=false;const timer=setTimeout(()=>start(e),170);function start(ev){if(started)return;started=true;el.setPointerCapture?.(pid);const ghost=el.cloneNode(true);ghost.classList.add('drag-ghost');ghost.querySelectorAll('input').forEach(x=>x.disabled=true);document.body.appendChild(ghost);el.classList.add('drag-source');drag={id,el,ghost};position(ev.clientX,ev.clientY);navigator.vibrate?.(8)}function position(x,y){if(!drag)return;drag.ghost.style.left=(x-drag.ghost.offsetWidth/2)+'px';drag.ghost.style.top=(y-50)+'px';document.querySelectorAll('.column').forEach(c=>c.classList.remove('drop-target'));document.querySelectorAll('.note').forEach(n=>n.classList.remove('drag-before'));const under=document.elementFromPoint(x,y);const col=under?.closest('.column');if(col)col.classList.add('drop-target');const target=under?.closest('.note');if(target&&target.dataset.id!==id)target.classList.add('drag-before');autoScroll(x)}function move(ev){if(!started&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>9){clearTimeout(timer);start(ev)}if(started){ev.preventDefault();position(ev.clientX,ev.clientY)}}function end(ev){clearTimeout(timer);window.removeEventListener('pointermove',move,true);window.removeEventListener('pointerup',end,true);window.removeEventListener('pointercancel',end,true);if(!started)return;const under=document.elementFromPoint(ev.clientX,ev.clientY),col=under?.closest('.column'),target=under?.closest('.note');cleanupDrag();if(col)dropNote(id,col.dataset.column,target?.dataset.id||null,ev.clientY)}function cleanupDrag(){document.querySelectorAll('.column').forEach(c=>c.classList.remove('drop-target'));document.querySelectorAll('.note').forEach(n=>n.classList.remove('drag-before'));drag?.ghost.remove();el.classList.remove('drag-source');drag=null}window.addEventListener('pointermove',move,{capture:true,passive:false});window.addEventListener('pointerup',end,true);window.addEventListener('pointercancel',end,true)},{passive:true})}
 function dropNote(id,column,targetId,y){const n=state.notes.find(x=>x.id===id);if(!n)return;const old=n.column;n.column=column;if(old!==column)normalizeOrder(old);let arr=activeNotes(column).filter(x=>x.id!==id);let idx=arr.length;if(targetId){const ti=arr.findIndex(x=>x.id===targetId);if(ti>=0){const targetEl=document.querySelector(`.note[data-id="${targetId}"]`),mid=targetEl?targetEl.getBoundingClientRect().top+targetEl.getBoundingClientRect().height/2:y;idx=ti+(y>mid?1:0)}}arr.splice(idx,0,n);arr.forEach((x,i)=>x.order=(i+1)*1000);render();toast(column==='completed'?'Completed ✓':'Sticky moved')}
@@ -75,126 +104,23 @@ const noteDialog=document.querySelector('#noteDialog'),noteForm=document.querySe
 function renderColors(active='yellow'){const row=document.querySelector('#colorRow');row.innerHTML=COLORS.map(c=>`<button type="button" class="swatch ${c} ${c===active?'active':''}" data-color="${c}" aria-label="${c}"></button>`).join('');row.querySelectorAll('.swatch').forEach(b=>b.onclick=()=>{document.querySelector('#noteColor').value=b.dataset.color;renderColors(b.dataset.color)})}
 function addCheckRow(text='',done=false,id=uid()){const row=document.createElement('div');row.className='check-edit-row';row.dataset.id=id;row.dataset.done=done?'1':'0';row.innerHTML=`<input maxlength="120" placeholder="Checklist item" value="${esc(text)}"><button type="button" class="remove-check">×</button>`;row.querySelector('.remove-check').onclick=()=>row.remove();document.querySelector('#checkEditor').appendChild(row)}
 document.querySelector('#addCheckBtn').onclick=()=>addCheckRow();function collectChecks(){return [...document.querySelectorAll('#checkEditor .check-edit-row')].map(r=>({id:r.dataset.id,text:r.querySelector('input').value.trim(),done:r.dataset.done==='1'})).filter(x=>x.text)}
-function openNew(column='todo'){fillCols();noteForm.reset();document.querySelector('#noteId').value='';document.querySelector('#noteColumn').value=column;document.querySelector('#noteColor').value='yellow';document.querySelector('#checkEditor').innerHTML='';renderColors('yellow');document.querySelector('#deleteNoteBtn').hidden=true;document.querySelector('#noteDialogTitle').textContent='New Sticky';noteDialog.showModal();setTimeout(()=>document.querySelector('#noteTitle').focus(),60)}
-function openEdit(id){fillCols();const n=state.notes.find(x=>x.id===id);if(!n)return;document.querySelector('#noteId').value=n.id;document.querySelector('#noteTitle').value=n.title;document.querySelector('#noteBody').value=n.body||'';document.querySelector('#noteColumn').value=n.column;document.querySelector('#noteColor').value=n.color||'yellow';document.querySelector('#noteDue').value=n.due||'';document.querySelector('#checkEditor').innerHTML='';(n.checks||[]).forEach(c=>addCheckRow(c.text,c.done,c.id));renderColors(n.color||'yellow');document.querySelector('#deleteNoteBtn').hidden=false;document.querySelector('#noteDialogTitle').textContent='Edit Sticky';noteDialog.showModal()}
-noteForm.addEventListener('submit',e=>{e.preventDefault();const id=document.querySelector('#noteId').value,data={title:document.querySelector('#noteTitle').value.trim(),body:document.querySelector('#noteBody').value.trim(),column:document.querySelector('#noteColumn').value,color:document.querySelector('#noteColor').value,due:document.querySelector('#noteDue').value,checks:collectChecks()};if(!data.title)return;if(id){const n=state.notes.find(n=>n.id===id),old=n.column;Object.assign(n,data);if(old!==data.column){normalizeOrder(old);n.order=Date.now()}}else state.notes.push({id:uid(),board:state.activeBoard,created:Date.now(),order:Date.now(),...data});noteDialog.close();render();toast(id?'Updated':'Sticky added')});
+function openNew(column='todo'){fillCols();noteForm.reset();document.querySelector('#noteId').value='';document.querySelector('#noteReminder').value='none';document.querySelector('#noteRepeat').value='none';document.querySelector('#noteFocus').value='25';document.querySelector('#noteColumn').value=column;document.querySelector('#noteColor').value='yellow';document.querySelector('#checkEditor').innerHTML='';renderColors('yellow');document.querySelector('#deleteNoteBtn').hidden=true;document.querySelector('#noteDialogTitle').textContent='New Sticky';noteDialog.showModal();setTimeout(()=>document.querySelector('#noteTitle').focus(),60)}
+function openEdit(id){fillCols();const n=state.notes.find(x=>x.id===id);if(!n)return;document.querySelector('#noteId').value=n.id;document.querySelector('#noteTitle').value=n.title;document.querySelector('#noteBody').value=n.body||'';document.querySelector('#noteColumn').value=n.column;document.querySelector('#noteColor').value=n.color||'yellow';document.querySelector('#noteDue').value=n.due||'';document.querySelector('#noteTime').value=n.time||'';document.querySelector('#noteReminder').value=n.reminder||'none';document.querySelector('#noteRepeat').value=n.repeat||'none';document.querySelector('#noteFocus').value=String(n.focus||25);document.querySelector('#checkEditor').innerHTML='';(n.checks||[]).forEach(c=>addCheckRow(c.text,c.done,c.id));renderColors(n.color||'yellow');document.querySelector('#deleteNoteBtn').hidden=false;document.querySelector('#noteDialogTitle').textContent='Edit Sticky';noteDialog.showModal()}
+noteForm.addEventListener('submit',e=>{e.preventDefault();const id=document.querySelector('#noteId').value,data={title:document.querySelector('#noteTitle').value.trim(),body:document.querySelector('#noteBody').value.trim(),column:document.querySelector('#noteColumn').value,color:document.querySelector('#noteColor').value,due:document.querySelector('#noteDue').value,time:document.querySelector('#noteTime').value,reminder:document.querySelector('#noteReminder').value,repeat:document.querySelector('#noteRepeat').value,focus:Number(document.querySelector('#noteFocus').value)||25,checks:collectChecks()};if(!data.title)return;if(id){const n=state.notes.find(n=>n.id===id),old=n.column;Object.assign(n,data);if(old!==data.column){normalizeOrder(old);n.order=Date.now()}}else state.notes.push({id:uid(),board:state.activeBoard,created:Date.now(),order:Date.now(),...data});noteDialog.close();render();toast(id?'Updated':'Sticky added')});
 document.querySelector('#deleteNoteBtn').onclick=()=>{const id=document.querySelector('#noteId').value;if(id&&confirm('Delete this sticky note?')){state.notes=state.notes.filter(n=>n.id!==id);noteDialog.close();render();toast('Deleted')}};document.querySelector('#cancelNoteBtn').onclick=()=>noteDialog.close();document.querySelector('#newNoteBtn').onclick=()=>openNew('todo');
 const boardDialog=document.querySelector('#boardDialog');document.querySelector('#newBoardBtn').onclick=()=>{document.querySelector('#boardForm').reset();boardDialog.showModal();setTimeout(()=>document.querySelector('#boardName').focus(),60)};document.querySelector('#cancelBoardBtn').onclick=()=>boardDialog.close();document.querySelector('#boardForm').onsubmit=e=>{e.preventDefault();const name=document.querySelector('#boardName').value.trim();if(!name)return;const id=uid();state.boards.push({id,name});state.activeBoard=id;boardDialog.close();render();toast('Board created')};
 const bs=document.querySelector('#boardSettingsDialog');document.querySelector('#boardSettingsBtn').onclick=()=>{const b=state.boards.find(x=>x.id===state.activeBoard);document.querySelector('#renameBoardInput').value=b?.name||'';document.querySelector('#deleteBoardBtn').disabled=state.boards.length<=1;bs.showModal()};document.querySelector('#cancelBoardSettingsBtn').onclick=()=>bs.close();document.querySelector('#boardSettingsForm').onsubmit=e=>{e.preventDefault();const b=state.boards.find(x=>x.id===state.activeBoard),name=document.querySelector('#renameBoardInput').value.trim();if(b&&name)b.name=name;bs.close();render();toast('Board renamed')};document.querySelector('#deleteBoardBtn').onclick=()=>{if(state.boards.length<=1)return;const b=state.boards.find(x=>x.id===state.activeBoard);if(confirm(`Delete “${b.name}” and all its sticky notes?`)){state.notes=state.notes.filter(n=>n.board!==b.id);state.boards=state.boards.filter(x=>x.id!==b.id);state.activeBoard=state.boards[0].id;bs.close();render();toast('Board deleted')}};
 document.querySelector('#allViewBtn').onclick=()=>{state.view='all';render()};document.querySelector('#todayViewBtn').onclick=()=>{state.view='today';render();document.querySelector('#boardWrap').scrollLeft=0};document.querySelector('#fullscreenBtn').onclick=async()=>{try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else if(document.exitFullscreen)await document.exitFullscreen()}catch{toast('Use Add to Home Screen for full-screen app mode')}};
+
+const pomoPanel=document.createElement('div');pomoPanel.id='pomoPanel';pomoPanel.innerHTML=`<div id="pomoTitle">🍅 Focus</div><div id="pomoTime">25:00</div><div class="btnrow"><button id="pomoPause">Pause</button><button id="pomoStop">Stop</button></div>`;document.body.appendChild(pomoPanel);
+let pomoTimer=null,pomoLeft=0,pomoNoteId=null;
+function pomoDraw(){document.querySelector('#pomoTime').textContent=String(Math.floor(pomoLeft/60)).padStart(2,'0')+':'+String(pomoLeft%60).padStart(2,'0')}
+function startPomodoro(id){const n=state.notes.find(x=>x.id===id);if(!n)return;clearInterval(pomoTimer);pomoNoteId=id;pomoLeft=(Number(n.focus)||25)*60;document.querySelector('#pomoTitle').textContent='🍅 '+n.title;pomoPanel.classList.add('on');pomoDraw();pomoTimer=setInterval(pomoTick,1000);document.querySelector('#pomoPause').textContent='Pause'}
+function pomoTick(){pomoLeft--;pomoDraw();if(pomoLeft<=0){clearInterval(pomoTimer);pomoTimer=null;const n=state.notes.find(x=>x.id===pomoNoteId);if(n){n.pomos=(n.pomos||0)+1;save();renderColumns()}pomoPanel.classList.remove('on');toast('Focus session complete 🍅')}}
+document.querySelector('#pomoPause').onclick=()=>{if(pomoTimer){clearInterval(pomoTimer);pomoTimer=null;document.querySelector('#pomoPause').textContent='Resume'}else{pomoTimer=setInterval(pomoTick,1000);document.querySelector('#pomoPause').textContent='Pause'}};
+document.querySelector('#pomoStop').onclick=()=>{clearInterval(pomoTimer);pomoTimer=null;pomoPanel.classList.remove('on')};
+
 render();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script>
-
-<style id="v5-enhancements">
-.v5-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12px}
-.v5-chip{background:rgba(255,255,255,.58);border:1px solid rgba(0,0,0,.08);border-radius:999px;padding:4px 7px}
-.v5-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.v5-tools label{font-size:12px;font-weight:700;display:flex;flex-direction:column;gap:5px}
-.v5-tools input,.v5-tools select{font:inherit;padding:9px;border-radius:10px;border:1px solid #d8d3c7;background:#fff}
-.v5-pomo{position:fixed;right:18px;bottom:18px;z-index:9999;background:#fffdf4;border:1px solid #ddd3b5;
-box-shadow:0 12px 35px rgba(0,0,0,.18);border-radius:18px;padding:14px;min-width:230px;display:none}
-.v5-pomo.on{display:block}.v5-pomo-time{font-size:34px;font-weight:800;letter-spacing:1px}
-.v5-pomo button{margin:5px 5px 0 0;border:0;border-radius:10px;padding:8px 10px;font-weight:700}
-.v5-focus-btn{border:0;border-radius:999px;padding:5px 8px;background:rgba(255,255,255,.65);font-weight:700}
-@media(max-width:700px){.v5-tools{grid-template-columns:1fr}}
-</style>
-<script id="v5-enhancements">
-(()=>{
-  const V5KEY='stickyKanbanV5Meta';
-  const load=()=>{try{return JSON.parse(localStorage.getItem(V5KEY)||'{}')}catch(e){return {}}};
-  const save=x=>localStorage.setItem(V5KEY,JSON.stringify(x));
-  let meta=load();
-
-  function cardKey(card){
-    return card.dataset.id || card.getAttribute('data-card-id') ||
-      (card.querySelector('h3,.title,.sticky-title')?.textContent||card.textContent||'').trim().slice(0,80);
-  }
-  function decorateCards(){
-    document.querySelectorAll('.sticky,.card,.note,[data-id],[data-card-id]').forEach(card=>{
-      if(card.dataset.v5done) return;
-      const k=cardKey(card); if(!k) return;
-      card.dataset.v5done='1';
-      const m=meta[k]||{};
-      const row=document.createElement('div'); row.className='v5-meta';
-      if(m.dueTime) row.innerHTML+=`<span class="v5-chip">⏰ ${m.dueTime}</span>`;
-      if(m.reminder && m.reminder!=='none') row.innerHTML+=`<span class="v5-chip">🔔 ${m.reminder}</span>`;
-      if(m.repeat && m.repeat!=='none') row.innerHTML+=`<span class="v5-chip">🔁 ${m.repeat}</span>`;
-      row.innerHTML+=`<button class="v5-focus-btn" type="button">🍅 Focus${m.pomos?` · ${m.pomos}`:''}</button>`;
-      card.appendChild(row);
-      row.querySelector('button').onclick=e=>{e.stopPropagation();startPomo(k,card)};
-    });
-  }
-
-  // Add fields to visible dialogs/forms when opened.
-  function enhanceEditor(){
-    const dialog=[...document.querySelectorAll('dialog,.modal,.editor,.sheet')].find(x=>{
-      const s=getComputedStyle(x); return s.display!=='none' && (x.open || s.visibility!=='hidden');
-    });
-    if(!dialog || dialog.querySelector('.v5-tools')) return;
-    const titleInput=dialog.querySelector('input[type=text],textarea');
-    const k=dialog.dataset.editingId || (titleInput?.value||'').trim().slice(0,80);
-    const m=meta[k]||{};
-    const box=document.createElement('div'); box.className='v5-tools';
-    box.innerHTML=`
-      <label>Due time <input class="v5-time" type="time" value="${m.dueTime||''}"></label>
-      <label>Reminder <select class="v5-rem">
-        ${[['none','None'],['at-time','At due time'],['10-min','10 min before'],['1-hour','1 hour before'],['1-day','1 day before']].map(([v,t])=>`<option value="${v}" ${m.reminder===v?'selected':''}>${t}</option>`).join('')}
-      </select></label>
-      <label>Repeat <select class="v5-rep">
-        ${[['none','None'],['daily','Daily'],['weekly','Weekly'],['monthly','Monthly']].map(([v,t])=>`<option value="${v}" ${m.repeat===v?'selected':''}>${t}</option>`).join('')}
-      </select></label>
-      <label>Focus length <select class="v5-len">
-        ${[25,30,45,50].map(v=>`<option value="${v}" ${m.focus==v?'selected':''}>${v} minutes</option>`).join('')}
-      </select></label>`;
-    const actions=dialog.querySelector('.actions,.modal-actions,.buttons') || dialog.lastElementChild;
-    (actions?.parentNode||dialog).insertBefore(box,actions||null);
-
-    const capture=()=>{
-      const newKey=(titleInput?.value||k).trim().slice(0,80) || k;
-      meta[newKey]={...(meta[k]||{}),dueTime:box.querySelector('.v5-time').value,
-        reminder:box.querySelector('.v5-rem').value,repeat:box.querySelector('.v5-rep').value,
-        focus:+box.querySelector('.v5-len').value||25};
-      save(meta);
-    };
-    box.addEventListener('change',capture);
-    dialog.querySelectorAll('button').forEach(b=>{
-      if(/save|add|update|done/i.test(b.textContent)) b.addEventListener('click',capture,{capture:true});
-    });
-  }
-
-  let timer=null, left=0, activeKey=null, activeCard=null;
-  const panel=document.createElement('div'); panel.className='v5-pomo';
-  panel.innerHTML=`<div><b>🍅 Focus</b></div><div class="v5-pomo-time">25:00</div>
-  <div><button class="v5-start">Pause</button><button class="v5-reset">Stop</button></div>`;
-  document.body.appendChild(panel);
-  function draw(){panel.querySelector('.v5-pomo-time').textContent=`${String(Math.floor(left/60)).padStart(2,'0')}:${String(left%60).padStart(2,'0')}`}
-  function finish(){
-    clearInterval(timer);timer=null;
-    if(activeKey){meta[activeKey]=meta[activeKey]||{};meta[activeKey].pomos=(meta[activeKey].pomos||0)+1;save(meta)}
-    panel.classList.remove('on'); alert('🍅 Focus session complete!');
-    document.querySelectorAll('[data-v5done]').forEach(x=>{x.dataset.v5done='';x.querySelector('.v5-meta')?.remove()});decorateCards();
-  }
-  function tick(){left--;draw();if(left<=0)finish()}
-  function startPomo(k,card){
-    activeKey=k;activeCard=card;const mins=meta[k]?.focus||25;left=mins*60;draw();panel.classList.add('on');
-    clearInterval(timer);timer=setInterval(tick,1000);panel.querySelector('.v5-start').textContent='Pause';
-  }
-  panel.querySelector('.v5-start').onclick=()=>{
-    if(timer){clearInterval(timer);timer=null;panel.querySelector('.v5-start').textContent='Resume'}
-    else{timer=setInterval(tick,1000);panel.querySelector('.v5-start').textContent='Pause'}
-  };
-  panel.querySelector('.v5-reset').onclick=()=>{clearInterval(timer);timer=null;panel.classList.remove('on')};
-
-  // In-app reminder while the PWA is open. True background push requires a push backend.
-  setInterval(()=>{
-    // Keep UI fresh; background push deliberately not faked.
-    decorateCards();
-  },5000);
-
-  const obs=new MutationObserver(()=>{decorateCards();enhanceEditor()});
-  obs.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['open','style','class']});
-  window.addEventListener('load',()=>{decorateCards();enhanceEditor()});
-})();
 </script>
 
 </body></html>

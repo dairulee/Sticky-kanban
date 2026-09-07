@@ -1,17 +1,15 @@
-# Sticky Kanban v5
+# Sticky Kanban v5 — fixed build
 
-iPad-friendly PWA update.
+This is the corrected v5 build. The v5 controls are now part of the Sticky editor itself instead of being injected afterward.
 
-## New in v5
-- Due time
-- Reminder choice UI
-- Repeat: daily / weekly / monthly
-- Pomodoro focus timer (25/30/45/50 min)
-- Focus-session count on sticky notes
-- Existing boards remain stored locally; v5 metadata uses a separate localStorage key.
+## Included
+- Due date + due time
+- Reminder option
+- Repeat option
+- Pomodoro focus length
+- Pomodoro timer and completed-focus count
+- Existing v4/v3 boards migrate in place using the same localStorage key
+- Service worker uses a new cache and network-first navigation so updates appear more reliably
 
-## Important
-The reminder options are stored and shown in the app. Reliable iPad notifications while the app is fully closed require a push-notification backend and are **not** enabled in this build.
-
-## Updating GitHub Pages
-Replace the repository files with the contents of this folder and commit. Keep the same GitHub Pages settings and URL.
+## Reminder limitation
+Reminder choices are stored/displayed, but true lock-screen push notifications are intentionally not enabled yet.

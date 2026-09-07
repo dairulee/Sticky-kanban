@@ -32,6 +32,7 @@ body.today-focus .column:not([data-column="today"]):not([data-column="progress"]
 #pomoPanel.on{display:block}#pomoTime{font-size:36px;font-weight:950;margin:4px 0 8px}#pomoTitle{font-weight:900;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #pomoPanel .btnrow{display:flex;gap:7px}#pomoPanel button{border:0;border-radius:10px;padding:8px 10px;font-weight:850}
 
+.sync-ui{display:flex;align-items:center;gap:8px;margin-left:auto}.sync-ui #syncStatus{font-size:12px;font-weight:800;opacity:.72}.sync-ui .btn{white-space:nowrap}@media(max-width:700px){.sync-ui #syncStatus{display:none}.sync-ui .btn{padding:8px 10px;font-size:12px}}
 </style>
 </head>
 <body>
@@ -84,7 +85,22 @@ const defaultState={activeBoard:'school',view:'all',boards:[{id:'school',name:'S
 ]};
 function clone(v){return JSON.parse(JSON.stringify(v))} function uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-5)}
 function load(){try{let raw=localStorage.getItem(KEY);if(!raw)for(const k of LEGACY){raw=localStorage.getItem(k);if(raw)break}const s=raw?JSON.parse(raw):clone(defaultState);s.view=s.view||'all';s.notes=(s.notes||[]).map(n=>({...n,checks:Array.isArray(n.checks)?n.checks:[],time:n.time||'',reminder:n.reminder||'none',repeat:n.repeat||'none',focus:Number(n.focus)||25,pomos:Number(n.pomos)||0}));return s}catch{return clone(defaultState)}}
-let state=load(); function save(){localStorage.setItem(KEY,JSON.stringify(state))} function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+let state=load();
+window.__syncApplying=false;
+window.__kanbanGetState=()=>clone(state);
+window.__kanbanApplyCloud=(incoming)=>{
+  if(!incoming||!Array.isArray(incoming.boards)||!Array.isArray(incoming.notes)) return;
+  state=incoming;
+  state.view=state.view||'all';
+  state.notes=(state.notes||[]).map(n=>({...n,checks:Array.isArray(n.checks)?n.checks:[],time:n.time||'',reminder:n.reminder||'none',repeat:n.repeat||'none',focus:Number(n.focus)||25,pomos:Number(n.pomos)||0}));
+  localStorage.setItem(KEY,JSON.stringify(state));
+  render();
+};
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(state));
+  if(!window.__syncApplying && typeof window.__kanbanCloudSave==='function') window.__kanbanCloudSave(clone(state));
+}
+function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function toast(msg){const t=document.querySelector('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),1250)}
 function activeNotes(column){return state.notes.filter(n=>n.board===state.activeBoard&&n.column===column).sort((a,b)=>(a.order??a.created)-(b.order??b.created))}
 function normalizeOrder(column){activeNotes(column).forEach((n,i)=>n.order=(i+1)*1000)}
@@ -123,4 +139,5 @@ document.querySelector('#pomoStop').onclick=()=>{clearInterval(pomoTimer);pomoTi
 render();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 
+<script type="module" src="./firebase-sync.js"></script>
 </body></html>

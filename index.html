@@ -7,10 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Sticky Kanban" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="format-detection" content="telephone=no" />
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png" />
-<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
 <title>Sticky Kanban</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <style>
@@ -24,7 +20,7 @@ button,input,textarea,select{font:inherit} button{color:inherit;cursor:pointer}.
 .notes{display:flex;flex-direction:column;gap:13px;min-height:150px}.note{position:relative;min-height:128px;padding:16px 14px 12px;border:1px solid rgba(0,0,0,.06);border-radius:3px 13px 6px 11px;box-shadow:var(--cardShadow);transform:rotate(var(--rot,0deg));touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .12s,box-shadow .12s,opacity .12s}.note::after{content:"";position:absolute;right:-1px;bottom:-1px;width:25px;height:25px;border-bottom-right-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,0) 48%,rgba(0,0,0,.055) 50%,rgba(255,255,255,.25) 52%);pointer-events:none}.note.drag-source{opacity:.18}.note.drag-before{transform:translateY(8px)}.note h3{margin:0 32px 7px 0;font-size:17px;line-height:1.18;font-weight:900}.note .body{font-size:13px;line-height:1.4;white-space:pre-wrap;margin:0 0 10px}.note-menu{position:absolute;right:6px;top:6px;border:0;background:transparent;border-radius:9px;padding:5px 7px;font-size:17px;font-weight:950}.note-menu:active{background:rgba(0,0,0,.08)}.meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;font-size:11px;color:rgba(48,43,37,.66);font-weight:700}.due.overdue{color:#a42525;font-weight:950}.done h3,.done .body{text-decoration:line-through;opacity:.55}.yellow{background:#fff09a}.pink{background:#ffc9dc}.blue{background:#bfe8ff}.green{background:#d3efbe}.orange{background:#ffd19e}.purple{background:#ddceff}
 .checks{display:grid;gap:6px;margin:9px 0 4px}.check{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;line-height:1.25}.check input{width:17px;height:17px;margin:0;flex:0 0 17px;accent-color:#39342e}.check span.checked{text-decoration:line-through;opacity:.55}.empty{padding:30px 8px;border:2px dashed rgba(70,60,48,.14);border-radius:14px;text-align:center;font-size:12px;color:rgba(48,43,37,.45);font-weight:700}
 .drag-ghost{position:fixed!important;z-index:9999;pointer-events:none;width:min(280px,74vw)!important;opacity:.94;transform:rotate(2.1deg) scale(1.045)!important;box-shadow:0 22px 50px rgba(0,0,0,.26)!important;transition:none!important}.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));z-index:10000;transform:translateX(-50%) translateY(18px);opacity:0;pointer-events:none;background:#302d29;color:#fff;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:850;transition:.2s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-dialog{border:0;border-radius:22px;padding:0;width:min(94vw,520px);max-height:88vh;box-shadow:0 28px 90px rgba(0,0,0,.28)}dialog::backdrop{background:rgba(0,0,0,.34);backdrop-filter:blur(3px)}.modal{padding:20px;background:#fffdf8;max-height:88vh;overflow:auto}.modal h2{margin:0 0 16px;font-size:24px}.field{display:grid;gap:6px;margin-bottom:13px}.field label{font-size:12px;font-weight:900;color:#6f675c}.field input,.field textarea,.field select{width:100%;min-height:45px;padding:11px 12px;border:1px solid #d6cdbc;border-radius:12px;background:#fff}.field textarea{min-height:100px;resize:vertical}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.danger{color:#a12727;border-color:#e7baba;background:#fff4f4}.hint{margin-top:9px;font-size:12px;color:#7c7367}.color-row{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.swatch{height:39px;border-radius:11px;border:2px solid transparent}.swatch.active{border-color:#302d29;box-shadow:0 0 0 2px #fff inset}.check-editor{display:grid;gap:8px}.check-edit-row{display:flex;gap:7px}.check-edit-row input{flex:1}.remove-check{width:42px;border:1px solid #ddd2c1;background:#fff;border-radius:11px;font-size:17px}.smallbtn{justify-self:start;border:0;background:#f2ece0;border-radius:10px;padding:8px 10px;font-weight:850}.view-note{display:none}.btn.installed{background:#e7f3df;border-color:#bfd4b2;color:#2f5a29}
+dialog{border:0;border-radius:22px;padding:0;width:min(94vw,520px);max-height:88vh;box-shadow:0 28px 90px rgba(0,0,0,.28)}dialog::backdrop{background:rgba(0,0,0,.34);backdrop-filter:blur(3px)}.modal{padding:20px;background:#fffdf8;max-height:88vh;overflow:auto}.modal h2{margin:0 0 16px;font-size:24px}.field{display:grid;gap:6px;margin-bottom:13px}.field label{font-size:12px;font-weight:900;color:#6f675c}.field input,.field textarea,.field select{width:100%;min-height:45px;padding:11px 12px;border:1px solid #d6cdbc;border-radius:12px;background:#fff}.field textarea{min-height:100px;resize:vertical}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.danger{color:#a12727;border-color:#e7baba;background:#fff4f4}.hint{margin-top:9px;font-size:12px;color:#7c7367}.color-row{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.swatch{height:39px;border-radius:11px;border:2px solid transparent}.swatch.active{border-color:#302d29;box-shadow:0 0 0 2px #fff inset}.check-editor{display:grid;gap:8px}.check-edit-row{display:flex;gap:7px}.check-edit-row input{flex:1}.remove-check{width:42px;border:1px solid #ddd2c1;background:#fff;border-radius:11px;font-size:17px}.smallbtn{justify-self:start;border:0;background:#f2ece0;border-radius:10px;padding:8px 10px;font-weight:850}.view-note{display:none}
 body.today-focus .column:not([data-column="today"]):not([data-column="progress"]):not([data-column="completed"]){display:none}body.today-focus .board{grid-template-columns:repeat(3,minmax(260px,1fr))}.today-badge{display:none;font-size:11px;padding:3px 7px;border-radius:999px;background:#302d29;color:#fff;font-weight:850}body.today-focus .today-badge{display:inline-block}
 @media(max-width:900px){.board{grid-template-columns:repeat(5,80vw)}body.today-focus .board{grid-template-columns:repeat(3,80vw)}.topbar{align-items:flex-start}.brand p{max-width:55vw}.col-head{top:78px}.column{min-height:70vh}.boardbar{align-items:flex-start;flex-wrap:wrap}.seg{order:3}}
 @media(min-width:1000px) and (orientation:landscape){.board{grid-template-columns:repeat(5,minmax(190px,1fr));min-width:0}.board-wrap{overflow-x:visible}.column{min-height:79vh}body.today-focus .board{grid-template-columns:repeat(3,minmax(250px,1fr))}}
@@ -33,12 +29,11 @@ body.today-focus .column:not([data-column="today"]):not([data-column="progress"]
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><h1>Sticky Kanban</h1><p>Like a paper board — made for touch, iPad, and Apple Pencil.</p></div><div class="top-actions"><button class="btn" id="installBtn">Install on iPad</button><button class="btn icon" id="fullscreenBtn" title="Full screen">⛶</button><button class="btn" id="boardSettingsBtn">Board ⚙︎</button><button class="btn primary" id="newNoteBtn">+ Sticky</button></div></header>
+<header class="topbar"><div class="brand"><h1>Sticky Kanban</h1><p>Like a paper board — made for touch, iPad, and Apple Pencil.</p></div><div class="top-actions"><button class="btn icon" id="fullscreenBtn" title="Full screen">⛶</button><button class="btn" id="boardSettingsBtn">Board ⚙︎</button><button class="btn primary" id="newNoteBtn">+ Sticky</button></div></header>
 <div class="boardbar"><div class="tabs" id="boardTabs"></div><button class="btn" id="newBoardBtn">+ Board</button><div class="seg"><button id="allViewBtn" class="active">All Board</button><button id="todayViewBtn">Today Focus</button></div></div>
 <div class="board-wrap" id="boardWrap"><main class="board" id="columns"></main></div>
 </div><div class="toast" id="toast"></div>
 
-<dialog id="installDialog"><div class="modal"><h2>Install Sticky Kanban on iPad</h2><p style="line-height:1.55;margin-top:-4px">To get a real home-screen icon and full-screen app view:</p><ol style="line-height:1.8;padding-left:22px"><li>Open this site in <strong>Safari</strong>.</li><li>Tap the <strong>Share</strong> button <strong>⬆︎</strong>.</li><li>Choose <strong>Add to Home Screen</strong>.</li><li>Keep the name <strong>Sticky Kanban</strong> and tap <strong>Add</strong>.</li></ol><p class="hint">After installation, open it from the yellow Sticky Kanban icon on your iPad Home Screen. Your boards stay saved on this device.</p><div class="modal-actions"><button class="btn primary" id="closeInstallBtn" type="button">Got it</button></div></div></dialog>
 <dialog id="noteDialog"><form method="dialog" class="modal" id="noteForm"><h2 id="noteDialogTitle">New Sticky</h2><input type="hidden" id="noteId" />
 <div class="field"><label>Title</label><input id="noteTitle" maxlength="80" required placeholder="e.g. HIM 130 Ch. 2 review" /></div>
 <div class="field"><label>Details</label><textarea id="noteBody" maxlength="700" placeholder="What do you need to do?"></textarea></div>
@@ -87,14 +82,119 @@ document.querySelector('#deleteNoteBtn').onclick=()=>{const id=document.querySel
 const boardDialog=document.querySelector('#boardDialog');document.querySelector('#newBoardBtn').onclick=()=>{document.querySelector('#boardForm').reset();boardDialog.showModal();setTimeout(()=>document.querySelector('#boardName').focus(),60)};document.querySelector('#cancelBoardBtn').onclick=()=>boardDialog.close();document.querySelector('#boardForm').onsubmit=e=>{e.preventDefault();const name=document.querySelector('#boardName').value.trim();if(!name)return;const id=uid();state.boards.push({id,name});state.activeBoard=id;boardDialog.close();render();toast('Board created')};
 const bs=document.querySelector('#boardSettingsDialog');document.querySelector('#boardSettingsBtn').onclick=()=>{const b=state.boards.find(x=>x.id===state.activeBoard);document.querySelector('#renameBoardInput').value=b?.name||'';document.querySelector('#deleteBoardBtn').disabled=state.boards.length<=1;bs.showModal()};document.querySelector('#cancelBoardSettingsBtn').onclick=()=>bs.close();document.querySelector('#boardSettingsForm').onsubmit=e=>{e.preventDefault();const b=state.boards.find(x=>x.id===state.activeBoard),name=document.querySelector('#renameBoardInput').value.trim();if(b&&name)b.name=name;bs.close();render();toast('Board renamed')};document.querySelector('#deleteBoardBtn').onclick=()=>{if(state.boards.length<=1)return;const b=state.boards.find(x=>x.id===state.activeBoard);if(confirm(`Delete “${b.name}” and all its sticky notes?`)){state.notes=state.notes.filter(n=>n.board!==b.id);state.boards=state.boards.filter(x=>x.id!==b.id);state.activeBoard=state.boards[0].id;bs.close();render();toast('Board deleted')}};
 document.querySelector('#allViewBtn').onclick=()=>{state.view='all';render()};document.querySelector('#todayViewBtn').onclick=()=>{state.view='today';render();document.querySelector('#boardWrap').scrollLeft=0};document.querySelector('#fullscreenBtn').onclick=async()=>{try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else if(document.exitFullscreen)await document.exitFullscreen()}catch{toast('Use Add to Home Screen for full-screen app mode')}};
-
-const installBtn=document.querySelector('#installBtn'),installDialog=document.querySelector('#installDialog');
-function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
-function refreshInstallUI(){if(isStandalone()){installBtn.textContent='Installed ✓';installBtn.classList.add('installed');installBtn.disabled=true;document.querySelector('#fullscreenBtn').style.display='none'}else{installBtn.textContent='Install on iPad';installBtn.classList.remove('installed');installBtn.disabled=false}}
-installBtn.onclick=()=>installDialog.showModal();
-document.querySelector('#closeInstallBtn').onclick=()=>installDialog.close();
-window.matchMedia('(display-mode: standalone)').addEventListener?.('change',refreshInstallUI);
-refreshInstallUI();
 render();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
+
+<style id="v5-enhancements">
+.v5-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12px}
+.v5-chip{background:rgba(255,255,255,.58);border:1px solid rgba(0,0,0,.08);border-radius:999px;padding:4px 7px}
+.v5-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.v5-tools label{font-size:12px;font-weight:700;display:flex;flex-direction:column;gap:5px}
+.v5-tools input,.v5-tools select{font:inherit;padding:9px;border-radius:10px;border:1px solid #d8d3c7;background:#fff}
+.v5-pomo{position:fixed;right:18px;bottom:18px;z-index:9999;background:#fffdf4;border:1px solid #ddd3b5;
+box-shadow:0 12px 35px rgba(0,0,0,.18);border-radius:18px;padding:14px;min-width:230px;display:none}
+.v5-pomo.on{display:block}.v5-pomo-time{font-size:34px;font-weight:800;letter-spacing:1px}
+.v5-pomo button{margin:5px 5px 0 0;border:0;border-radius:10px;padding:8px 10px;font-weight:700}
+.v5-focus-btn{border:0;border-radius:999px;padding:5px 8px;background:rgba(255,255,255,.65);font-weight:700}
+@media(max-width:700px){.v5-tools{grid-template-columns:1fr}}
+</style>
+<script id="v5-enhancements">
+(()=>{
+  const V5KEY='stickyKanbanV5Meta';
+  const load=()=>{try{return JSON.parse(localStorage.getItem(V5KEY)||'{}')}catch(e){return {}}};
+  const save=x=>localStorage.setItem(V5KEY,JSON.stringify(x));
+  let meta=load();
+
+  function cardKey(card){
+    return card.dataset.id || card.getAttribute('data-card-id') ||
+      (card.querySelector('h3,.title,.sticky-title')?.textContent||card.textContent||'').trim().slice(0,80);
+  }
+  function decorateCards(){
+    document.querySelectorAll('.sticky,.card,.note,[data-id],[data-card-id]').forEach(card=>{
+      if(card.dataset.v5done) return;
+      const k=cardKey(card); if(!k) return;
+      card.dataset.v5done='1';
+      const m=meta[k]||{};
+      const row=document.createElement('div'); row.className='v5-meta';
+      if(m.dueTime) row.innerHTML+=`<span class="v5-chip">⏰ ${m.dueTime}</span>`;
+      if(m.reminder && m.reminder!=='none') row.innerHTML+=`<span class="v5-chip">🔔 ${m.reminder}</span>`;
+      if(m.repeat && m.repeat!=='none') row.innerHTML+=`<span class="v5-chip">🔁 ${m.repeat}</span>`;
+      row.innerHTML+=`<button class="v5-focus-btn" type="button">🍅 Focus${m.pomos?` · ${m.pomos}`:''}</button>`;
+      card.appendChild(row);
+      row.querySelector('button').onclick=e=>{e.stopPropagation();startPomo(k,card)};
+    });
+  }
+
+  // Add fields to visible dialogs/forms when opened.
+  function enhanceEditor(){
+    const dialog=[...document.querySelectorAll('dialog,.modal,.editor,.sheet')].find(x=>{
+      const s=getComputedStyle(x); return s.display!=='none' && (x.open || s.visibility!=='hidden');
+    });
+    if(!dialog || dialog.querySelector('.v5-tools')) return;
+    const titleInput=dialog.querySelector('input[type=text],textarea');
+    const k=dialog.dataset.editingId || (titleInput?.value||'').trim().slice(0,80);
+    const m=meta[k]||{};
+    const box=document.createElement('div'); box.className='v5-tools';
+    box.innerHTML=`
+      <label>Due time <input class="v5-time" type="time" value="${m.dueTime||''}"></label>
+      <label>Reminder <select class="v5-rem">
+        ${[['none','None'],['at-time','At due time'],['10-min','10 min before'],['1-hour','1 hour before'],['1-day','1 day before']].map(([v,t])=>`<option value="${v}" ${m.reminder===v?'selected':''}>${t}</option>`).join('')}
+      </select></label>
+      <label>Repeat <select class="v5-rep">
+        ${[['none','None'],['daily','Daily'],['weekly','Weekly'],['monthly','Monthly']].map(([v,t])=>`<option value="${v}" ${m.repeat===v?'selected':''}>${t}</option>`).join('')}
+      </select></label>
+      <label>Focus length <select class="v5-len">
+        ${[25,30,45,50].map(v=>`<option value="${v}" ${m.focus==v?'selected':''}>${v} minutes</option>`).join('')}
+      </select></label>`;
+    const actions=dialog.querySelector('.actions,.modal-actions,.buttons') || dialog.lastElementChild;
+    (actions?.parentNode||dialog).insertBefore(box,actions||null);
+
+    const capture=()=>{
+      const newKey=(titleInput?.value||k).trim().slice(0,80) || k;
+      meta[newKey]={...(meta[k]||{}),dueTime:box.querySelector('.v5-time').value,
+        reminder:box.querySelector('.v5-rem').value,repeat:box.querySelector('.v5-rep').value,
+        focus:+box.querySelector('.v5-len').value||25};
+      save(meta);
+    };
+    box.addEventListener('change',capture);
+    dialog.querySelectorAll('button').forEach(b=>{
+      if(/save|add|update|done/i.test(b.textContent)) b.addEventListener('click',capture,{capture:true});
+    });
+  }
+
+  let timer=null, left=0, activeKey=null, activeCard=null;
+  const panel=document.createElement('div'); panel.className='v5-pomo';
+  panel.innerHTML=`<div><b>🍅 Focus</b></div><div class="v5-pomo-time">25:00</div>
+  <div><button class="v5-start">Pause</button><button class="v5-reset">Stop</button></div>`;
+  document.body.appendChild(panel);
+  function draw(){panel.querySelector('.v5-pomo-time').textContent=`${String(Math.floor(left/60)).padStart(2,'0')}:${String(left%60).padStart(2,'0')}`}
+  function finish(){
+    clearInterval(timer);timer=null;
+    if(activeKey){meta[activeKey]=meta[activeKey]||{};meta[activeKey].pomos=(meta[activeKey].pomos||0)+1;save(meta)}
+    panel.classList.remove('on'); alert('🍅 Focus session complete!');
+    document.querySelectorAll('[data-v5done]').forEach(x=>{x.dataset.v5done='';x.querySelector('.v5-meta')?.remove()});decorateCards();
+  }
+  function tick(){left--;draw();if(left<=0)finish()}
+  function startPomo(k,card){
+    activeKey=k;activeCard=card;const mins=meta[k]?.focus||25;left=mins*60;draw();panel.classList.add('on');
+    clearInterval(timer);timer=setInterval(tick,1000);panel.querySelector('.v5-start').textContent='Pause';
+  }
+  panel.querySelector('.v5-start').onclick=()=>{
+    if(timer){clearInterval(timer);timer=null;panel.querySelector('.v5-start').textContent='Resume'}
+    else{timer=setInterval(tick,1000);panel.querySelector('.v5-start').textContent='Pause'}
+  };
+  panel.querySelector('.v5-reset').onclick=()=>{clearInterval(timer);timer=null;panel.classList.remove('on')};
+
+  // In-app reminder while the PWA is open. True background push requires a push backend.
+  setInterval(()=>{
+    // Keep UI fresh; background push deliberately not faked.
+    decorateCards();
+  },5000);
+
+  const obs=new MutationObserver(()=>{decorateCards();enhanceEditor()});
+  obs.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['open','style','class']});
+  window.addEventListener('load',()=>{decorateCards();enhanceEditor()});
+})();
+</script>
+
 </body></html>

@@ -1,10 +1,8 @@
-// Paste ONLY your Firebase config object values here.
-// Firebase Console > Project settings > General > Your apps > Sticky Kanban Board > SDK setup and configuration
 export const firebaseConfig = {
-  apiKey: "PASTE_HERE",
-  authDomain: "PASTE_HERE",
-  projectId: "PASTE_HERE",
-  storageBucket: "PASTE_HERE",
-  messagingSenderId: "PASTE_HERE",
-  appId: "PASTE_HERE"
+  apiKey: "AIzaSyDi5Ik-vWGNnE84yXr8tY8TU2O-0smdbCc",
+  authDomain: "dairulee-755bb.firebaseapp.com",
+  projectId: "dairulee-755bb",
+  storageBucket: "dairulee-755bb.firebasestorage.app",
+  messagingSenderId: "151365982500",
+  appId: "1:151365982500:web:e3bb8182b9a50be498fbb1"
 };
